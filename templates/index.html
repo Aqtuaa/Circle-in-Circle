@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Circle in Circle</title>
+        <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+        <style>
+            body{
+                background-color: #696E71;
+                margin: auto;
+                margin-top: 50px;
+                font-family:Verdana, Geneva, Tahoma, sans-serif;
+            }
+            .input_div{
+                text-align: center;
+                background-color: #B2B6BA;
+                border-radius: 10px;
+                width: 25%;
+                margin: auto;
+                height: 170px;
+                padding-top: 10px;
+                border: 1px solid rgb(0, 0, 0);
+                box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+            }
+            .fill_coloumn{
+                margin-top: 30px;
+                display: flex;       
+                justify-content: center;
+                gap : 50px;
+            }
+
+            .group {
+                display: flex;
+                flex-direction: column; 
+                gap: 5px;
+                align-items: center;
+                font-size: 20px;
+            }
+
+            input{
+                background-color: #F8F9FA;
+                border-radius: 5px;
+                height : 30px;
+                font-weight: 250;
+            }
+
+            .explaination{
+                margin: auto;
+                margin-top: 30px;
+                color : white;
+                font-size: 16px;
+                text-align: center;
+                display: flex; 
+                align-items: center;
+                justify-content: center;
+            }
+
+            button{
+                margin:auto;
+                display: flex;    
+                align-items: center;   
+                justify-content: center;
+                margin-top: 30px;
+                width : 200px;
+                height: 50px;
+                border-radius: 15px;
+                font-weight: bold;
+                font-size: 16px;
+                background-color: #E1E2E4;
+                transition: 0.3s;
+            }
+
+            button:hover{
+                background-color: #a4a8af;
+            }
+
+            .plot_container {
+                display: flex;
+                flex-direction: column;
+                align-items: center;   
+                justify-content: center;
+                margin-top: 50px;
+            }
+
+            .plot_img {
+                width: 500px;
+                height: 500px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+        </style>
+    </head>
+
+    <body>
+
+        <div class = "input_div">
+            <h2>Input Circle Paramaters</h2>
+                <div class = "fill_coloumn">
+                     <div class="group">
+                        <label>Samples</label>
+                        <input type="number" id="samples" value="300">
+                    </div>
+
+                    <div class="group">
+                        <label>Noise</label>
+                        <input type="number" step="0.01" id="noise" value="0.05">
+                    </div>
+                </div>
+        </div>
+
+        <button onclick="generate()">Generate</button>
+
+        <div class = "explaination">
+            <label>The larger the noise, the more scattered and random the samples become (Noise could be a decimal number)</label>
+        </div>
+
+        <div id="result_container" class="plot_container" style="display: none;">
+            <h3>Result</h3>
+            <div class="plot_img">
+                <div id="plot"></div>
+            </div>
+        </div>
+
+        <script>
+        async function generate() {
+            const n_samples = document.getElementById("samples").value;
+            const noise = document.getElementById("noise").value;
+
+            const res = await fetch("/circles", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({
+                    n_samples: parseInt(n_samples),
+                    noise: parseFloat(noise)
+                })
+            });
+
+            const data = await res.json();
+            document.getElementById("result_container").style.display = "flex";
+
+            let x = data.X.map(p => p[0]);
+            let y = data.X.map(p => p[1]);
+            let label = data.y;
+
+            let trace = {
+                x: x,
+                y: y,
+                mode: 'markers',
+                type: 'scatter',
+                marker: {
+                    size: 6,
+                    color: label
+                }
+            };
+
+            Plotly.newPlot('plot', [trace]);
+        }
+        </script>
+    </body>
+</html>
